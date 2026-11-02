@@ -1,0 +1,120 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>News Windows</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a desktop of window tiles, each with a title bar and a body that opens the site in a new tab */
+:root {
+  --bg: #e9ecef;
+  --surface: #ffffff;
+  --bar: #2f4a63;
+  --bar-fg: #ffffff;
+  --fg: #1c2530;
+  --muted: #5c6a78;
+  --accent: #c8501e;
+  --line: #c9d1d9;
+  --font-display: "Space Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131a21; --surface: #1d2731; --bar: #3b5a78; --bar-fg: #f2f5f8;
+    --fg: #e4e9ee; --muted: #9aa8b6; --accent: #f0814f; --line: #33424f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131a21; --surface: #1d2731; --bar: #3b5a78; --bar-fg: #f2f5f8;
+  --fg: #e4e9ee; --muted: #9aa8b6; --accent: #f0814f; --line: #33424f;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px;
+  padding-block: 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 1100px; margin: 0 auto; }
+h1 { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 4px; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0 0 24px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+.win {
+  display: flex; flex-direction: column; min-width: 0;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 6px; overflow: hidden; text-decoration: none; color: inherit;
+  box-shadow: 0 2px 0 var(--line);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.win:hover, .win:focus-visible { transform: translateY(-3px); box-shadow: 0 6px 0 var(--accent); outline: none; }
+.win:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bar {
+  display: flex; align-items: center; gap: 6px; padding: 7px 10px;
+  background: var(--bar); color: var(--bar-fg);
+  font-family: var(--font-display); font-size: .75rem;
+}
+.dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; opacity: .45; flex: none; }
+.dot:first-child { background: var(--accent); opacity: 1; }
+.bar span.host { margin-left: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.body { display: flex; flex-direction: column; gap: 6px; padding: 20px 14px 16px; }
+.mono {
+  font-family: var(--font-display); font-weight: 700; font-size: 1.9rem; line-height: 1;
+  color: var(--accent);
+}
+.name { font-weight: 600; font-size: 1.05rem; overflow-wrap: anywhere; }
+.open { color: var(--muted); font-size: .85rem; }
+.win:hover .open { color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .win { transition: none; } }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Space+Mono:wght@400;700&display=swap">
+
+<main>
+  <h1>News Windows</h1>
+  <p class="sub">Click a window to open the site in a new tab.</p>
+  <div class="grid" id="grid"></div>
+</main>
+
+<script>
+const sites = [
+  ["ERT Open", "https://www.ertopen.com/"],
+  ["Antimedia", "https://antimedia.gr/"],
+  ["Paron", "https://www.paron.gr/"],
+  ["Thriassio", "https://thriassio.gr/"],
+  ["Pelop", "https://pelop.gr/"],
+  ["Wikipedia Current Events", "https://en.wikipedia.org/wiki/Portal:Current_events"],
+  ["Iskra", "https://iskra.gr/"],
+  ["Karditsa Stakra", "https://karditsastakra.com/"],
+  ["Press GR", "https://www.press-gr.com/"],
+  ["902.gr", "https://www.902.gr/"],
+  ["Estia News", "https://www.estianews.gr/"],
+  ["Zougla", "https://www.zougla.gr/"],
+  ["Dimoskopiseis", "https://dimoskopiseis.gr/"],
+  ["Makeleio", "https://www.makeleio.gr/"],
+  ["Avgi", "https://www.avgi.gr/"],
+  ["Google Trends Greece", "https://trends.google.gr/trending?geo=GR&hours=24"],
+  ["We Are Solomon", "https://wearesolomon.com/"],
+  ["Front Pages", "https://www.frontpages.gr/"],
+  ["Nature: DNA", "https://www.nature.com/subjects/dna"],
+  ["Nature: Chromosomes", "https://www.nature.com/subjects/chromosomes"],
+  ["Nature: Nucleosomes", "https://www.nature.com/subjects/nucleosomes"],
+  ["Knowable Magazine", "https://knowablemagazine.org/"],
+  ["Quanta Magazine", "https://www.quantamagazine.org/"],
+  ["MIT News", "https://news.mit.edu/"],
+  ["Hacker News", "https://news.ycombinator.com/"],
+  ["Science News", "https://www.sciencenews.org/"],
+  ["The Scientist", "https://www.the-scientist.com/"]
+];
+const grid = document.getElementById("grid");
+for (const [name, url] of sites) {
+  const host = new URL(url).hostname.replace(/^www\./, "");
+  const a = document.createElement("a");
+  a.className = "win"; a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer";
+  a.innerHTML = '<div class="bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="host"></span></div>' +
+    '<div class="body"><div class="mono"></div><div class="name"></div><div class="open">Open site &rarr;</div></div>';
+  a.querySelector(".host").textContent = host;
+  a.querySelector(".mono").textContent = name.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase();
+  a.querySelector(".name").textContent = name;
+  grid.appendChild(a);
+}
+</script>
+
+</body></html>
